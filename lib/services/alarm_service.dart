@@ -10,7 +10,6 @@ class AlarmService {
       id: id,
       dateTime: dateTime,
       assetAudioPath: 'assets/audio/alarm1.mp3',
-      loopAudio: true,
       vibrate: true,
       warningNotificationOnKill: true,
       androidFullScreenIntent: true,

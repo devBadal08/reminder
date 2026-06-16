@@ -36,10 +36,26 @@ class _ReminderAppState extends State<ReminderApp> {
     super.initState();
 
     Alarm.ringStream.stream.listen((alarmSettings) {
+      final box = Hive.box('reminders');
+
+      Map? reminderData;
+
+      for (int i = 0; i < box.length; i++) {
+        final item = box.getAt(i);
+
+        if (item["alarmId"] == alarmSettings.id) {
+          reminderData = item;
+          break;
+        }
+      }
+
       navigatorKey.currentState?.push(
         MaterialPageRoute(
-          builder: (_) =>
-              AlarmScreen(alarmId: alarmSettings.id, title: "Reminder"),
+          builder: (_) => AlarmScreen(
+            alarmId: alarmSettings.id,
+            title: reminderData?["title"] ?? "Reminder",
+            tableData: reminderData?["tableData"],
+          ),
         ),
       );
     });
