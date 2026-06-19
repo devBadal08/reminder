@@ -68,6 +68,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/audio/alarm1.mp3
+    - assets/calendar_illustration.png
+    - assets/calendar_bell.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

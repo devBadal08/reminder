@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:reminder/screens/alarm_screen.dart';
 import 'package:reminder/screens/name_screen.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:reminder/screens/splash_screen.dart';
 import 'package:reminder/services/notification_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -68,7 +69,7 @@ class _ReminderAppState extends State<ReminderApp> {
       debugShowCheckedModeBanner: false,
       title: 'Reminder',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-      home: const NameScreen(),
+      home: const SplashScreen(),
     );
   }
 }

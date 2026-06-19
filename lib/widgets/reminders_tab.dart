@@ -11,327 +11,615 @@ class RemindersTab extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: Hive.box('reminders').listenable(),
       builder: (context, Box box, _) {
-        if (box.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.widgets_rounded,
-                  size: 54,
-                  color: const Color(0xFF1E3A8A).withOpacity(0.15),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  "Your timeline is clear.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: const Color(0xFF1E3A8A).withOpacity(0.4),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 110.0),
-          itemCount: box.length,
-          itemBuilder: (context, index) {
-            final reminder = box.getAt(index);
-            final List<dynamic>? tableData = reminder["tableData"];
-            bool isExpanded =
-                false; // Tracks the interactive collapse state locally
-
-            return StatefulBuilder(
-              builder: (context, setTileState) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: const Color(0xFF2563EB).withOpacity(0.12),
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.06),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                      BoxShadow(
-                        color: const Color(0xFF1E3A8A).withOpacity(0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
+        return Stack(
+          children: [
+            // Elegant glowing aura backdrop instead of standard geometric circles
+            Positioned(
+              top: -60,
+              right: -60,
+              child: Container(
+                width: 260,
+                height: 260,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      const Color(
+                        0xFFFFECE2,
+                      ).withOpacity(0.85), // Soft peach core glow
+                      const Color(
+                        0xFFF6F4F0,
+                      ), // Fades seamlessly into your page background
                     ],
+                    stops: const [0.2, 1.0],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        dividerColor: Colors.transparent,
-                        splashColor: const Color(0xFF2563EB).withOpacity(0.03),
-                      ),
-                      child: ExpansionTile(
-                        backgroundColor: Colors.white,
-                        collapsedBackgroundColor: Colors.white,
-                        tilePadding: const EdgeInsets.fromLTRB(20, 12, 14, 12),
-                        onExpansionChanged: (expanding) {
-                          setTileState(() {
-                            isExpanded = expanding;
-                          });
-                        },
-                        leading: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB).withOpacity(0.08),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.alarm_on_rounded,
-                            color: Color(0xFF2563EB),
-                            size: 22,
+                ),
+              ),
+            ),
+            Positioned(
+              top: -15,
+              right: 20,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.6),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF8C4A32).withOpacity(0.04),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Top Header Configuration Block
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24.0, 5.0, 24.0, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          height: 16,
+                        ), // Adjusted alignment pad matching text label baseline
+                        Text(
+                          "Review your timeline.\nEverything is under control.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: const Color(0xFF2D3142).withOpacity(0.6),
+                            fontWeight: FontWeight.w500,
+                            height: 1.3,
                           ),
                         ),
-                        title: Text(
-                          reminder["title"] ?? "Untitled",
-                          style: const TextStyle(
-                            color: Color(0xFF1E3A8A),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 17,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_today_rounded,
-                                    size: 12,
+                      ],
+                    ),
+                  ),
+                  // Rendered 3D Calendar Graphic Asset Image integration layer
+                  Padding(
+                    padding: const EdgeInsets.only(right: 0.0, top: 0.0),
+                    child: Image.asset(
+                      'assets/calendar_bell.png', // Reference target layout graphic asset path mapping keys
+                      width: 120,
+                      height: 90,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Text("📅", style: TextStyle(fontSize: 54));
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Main Reminders Timeline Feed Content Container
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 110.0,
+              ), // Pulled up lists context wrapper boundary safely
+              child: box.isEmpty
+                  ? Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 140,
+                                  height: 140,
+                                  decoration: BoxDecoration(
                                     color: const Color(
-                                      0xFF1E3A8A,
-                                    ).withOpacity(0.4),
+                                      0xFF8C4A32,
+                                    ).withOpacity(0.06),
+                                    shape: BoxShape.circle,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    reminder["date"]?.toString().split(
-                                          " ",
-                                        )[0] ??
-                                        "No Date",
-                                    style: TextStyle(
-                                      color: const Color(
-                                        0xFF1E3A8A,
-                                      ).withOpacity(0.6),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                ),
+                                Container(
+                                  width: 110,
+                                  height: 110,
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF8C4A32,
+                                    ).withOpacity(0.08),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const Text(
+                                  "📋",
+                                  style: TextStyle(fontSize: 54),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            const Text(
+                              "All your reminders will\nappear here.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF2D3142),
+                                fontWeight: FontWeight.w600,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              width: 32,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF8C4A32),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        20.0,
+                        16.0,
+                        20.0,
+                        140.0,
+                      ),
+                      itemCount: box.length,
+                      itemBuilder: (context, index) {
+                        final reminder = box.getAt(index);
+                        final List<dynamic>? tableData = reminder["tableData"];
+
+                        return StatefulBuilder(
+                          builder: (context, setTileState) {
+                            final tileKey = ValueKey('reminder_tile_$index');
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 18),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: const Color(0xFFF1F1F1),
+                                  width: 1.2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.015),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 10),
+                                  ),
+                                ],
+                              ),
+                              child: Stack(
+                                clipBehavior: Clip
+                                    .none, // Allow custom corner curve painter to draw exactly over the border path line
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: Theme(
+                                      data: Theme.of(context).copyWith(
+                                        dividerColor: Colors.transparent,
+                                        splashColor: const Color(
+                                          0xFF8C4A32,
+                                        ).withOpacity(0.02),
+                                      ),
+                                      child: ExpansionTile(
+                                        key: tileKey,
+                                        backgroundColor: Colors.white,
+                                        collapsedBackgroundColor: Colors.white,
+                                        tilePadding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          14,
+                                          12,
+                                          14,
+                                        ),
+                                        childrenPadding: EdgeInsets.zero,
+                                        leading: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xFF8C4A32,
+                                            ).withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.access_alarm_rounded,
+                                            color: Color(0xFF8C4A32),
+                                            size: 24,
+                                          ),
+                                        ),
+                                        title: Text(
+                                          reminder["title"] ?? "Untitled",
+                                          style: const TextStyle(
+                                            color: Color(0xFF2D3142),
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 17,
+                                            letterSpacing: -0.3,
+                                          ),
+                                        ),
+                                        subtitle: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 10.0,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Wrap(
+                                                spacing: 14,
+                                                runSpacing: 6,
+                                                crossAxisAlignment:
+                                                    WrapCrossAlignment.center,
+                                                children: [
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons
+                                                            .calendar_today_rounded,
+                                                        size: 14,
+                                                        color: Color(
+                                                          0xFF8C4A32,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 6),
+                                                      Text(
+                                                        reminder["date"]
+                                                                ?.toString()
+                                                                .split(
+                                                                  " ",
+                                                                )[0] ??
+                                                            "No Date",
+                                                        style: TextStyle(
+                                                          color: const Color(
+                                                            0xFF2D3142,
+                                                          ).withOpacity(0.6),
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons
+                                                            .access_time_rounded,
+                                                        size: 14,
+                                                        color: Color(
+                                                          0xFF8C4A32,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 6),
+                                                      Text(
+                                                        reminder["time"] ??
+                                                            "No Time",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              if (tableData != null &&
+                                                  tableData.isNotEmpty)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        top: 12.0,
+                                                      ),
+                                                  child: Row(
+                                                    children: [
+                                                      const Text(
+                                                        "Tap to see more",
+                                                        style: TextStyle(
+                                                          color: Color(
+                                                            0xFF8C4A32,
+                                                          ),
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 2),
+                                                      Icon(
+                                                        Icons
+                                                            .keyboard_arrow_down_rounded,
+                                                        size: 14,
+                                                        color: const Color(
+                                                          0xFF8C4A32,
+                                                        ).withOpacity(0.8),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              icon: Container(
+                                                padding: const EdgeInsets.all(
+                                                  8,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFF8C4A32,
+                                                  ).withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                                child: const Icon(
+                                                  Icons.delete_outline_rounded,
+                                                  color: Color(0xFF8C4A32),
+                                                  size: 20,
+                                                ),
+                                              ),
+                                              onPressed: () async {
+                                                try {
+                                                  final reminderData = box
+                                                      .getAt(index);
+                                                  final alarmId =
+                                                      reminderData["alarmId"];
+                                                  await Alarm.stop(alarmId);
+                                                  await NotificationService
+                                                      .notifications
+                                                      .cancel(alarmId);
+                                                  await box.deleteAt(index);
+                                                } catch (e) {
+                                                  debugPrint(
+                                                    "Delete Error: $e",
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        children: [
+                                          if (tableData != null &&
+                                              tableData.isNotEmpty) ...[
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                              ),
+                                              child: Divider(
+                                                color: Color(0xFFF1F1F1),
+                                                height: 1,
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(
+                                                14.0,
+                                              ),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFFFBFBFB,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  border: Border.all(
+                                                    color: const Color(
+                                                      0xFFE5E5E5,
+                                                    ),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  child: SingleChildScrollView(
+                                                    scrollDirection:
+                                                        Axis.horizontal,
+                                                    physics:
+                                                        const BouncingScrollPhysics(),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            6.0,
+                                                          ),
+                                                      child: Table(
+                                                        defaultColumnWidth:
+                                                            const FixedColumnWidth(
+                                                              120.0,
+                                                            ),
+                                                        children: List.generate(tableData.length, (
+                                                          rowIndex,
+                                                        ) {
+                                                          final row =
+                                                              tableData[rowIndex]
+                                                                  as List;
+                                                          final bool isHeader =
+                                                              rowIndex == 0;
+
+                                                          return TableRow(
+                                                            children: List.generate(row.length, (
+                                                              colIndex,
+                                                            ) {
+                                                              return Container(
+                                                                padding:
+                                                                    const EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          10,
+                                                                      vertical:
+                                                                          10,
+                                                                    ),
+                                                                margin:
+                                                                    const EdgeInsets.all(
+                                                                      2,
+                                                                    ),
+                                                                decoration: BoxDecoration(
+                                                                  color:
+                                                                      isHeader
+                                                                      ? const Color(
+                                                                          0xFF8C4A32,
+                                                                        ).withOpacity(
+                                                                          0.08,
+                                                                        )
+                                                                      : Colors
+                                                                            .white,
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        8,
+                                                                      ),
+                                                                  border: Border.all(
+                                                                    color:
+                                                                        isHeader
+                                                                        ? const Color(
+                                                                            0xFF8C4A32,
+                                                                          ).withOpacity(
+                                                                            0.15,
+                                                                          )
+                                                                        : const Color(
+                                                                            0xFFEFEFEF,
+                                                                          ),
+                                                                  ),
+                                                                ),
+                                                                child: Text(
+                                                                  row[colIndex]
+                                                                      .toString(),
+                                                                  textAlign:
+                                                                      TextAlign
+                                                                          .center,
+                                                                  style: TextStyle(
+                                                                    fontSize:
+                                                                        13,
+                                                                    fontWeight:
+                                                                        rowIndex ==
+                                                                            0
+                                                                        ? FontWeight
+                                                                              .w800
+                                                                        : FontWeight
+                                                                              .w500,
+                                                                    color: const Color(
+                                                                      0xFF2D3142,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }),
+                                                          );
+                                                        }),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Icon(
-                                    Icons.access_time_rounded,
-                                    size: 12,
-                                    color: const Color(
-                                      0xFF1E3A8A,
-                                    ).withOpacity(0.4),
+                                  // Repositioned Custom Paint block outside the clipped layout view to align precisely on the container border frame
+                                  Positioned(
+                                    bottom:
+                                        -0.6, // Nudges the custom painter line to sit exactly flush on top of the 1.2px frame outline
+                                    left: -0.6,
+                                    child: CustomPaint(
+                                      size: const Size(
+                                        26,
+                                        26,
+                                      ), // Match path radius
+                                      painter: CornerCurvePainter(
+                                        color: const Color(
+                                          0xFF8C4A32,
+                                        ), // Keeps your bright highlighted designer asset accent intact
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    reminder["time"] ?? "No Time",
-                                    style: TextStyle(
-                                      color: const Color(
-                                        0xFF1E3A8A,
-                                      ).withOpacity(0.6),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
+                                  Positioned(
+                                    top:
+                                        0.6, // Nudges the custom painter line to sit exactly flush on top of the 1.2px frame outline
+                                    right: 0.6,
+                                    child: CustomPaint(
+                                      size: const Size(
+                                        26,
+                                        26,
+                                      ), // Match path radius
+                                      painter: TopCornerCurvePainter(
+                                        color: const Color(
+                                          0xFF8C4A32,
+                                        ), // Keeps your bright highlighted designer asset accent intact
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              // --- "TAP TO SEE MORE" IMPLEMENTATION ---
-                              if (tableData != null && tableData.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        isExpanded
-                                            ? "Tap to close"
-                                            : "Tap to see more",
-                                        style: TextStyle(
-                                          color: isExpanded
-                                              ? const Color(
-                                                  0xFFEF4444,
-                                                ).withOpacity(0.7)
-                                              : const Color(0xFFF59E0B),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          letterSpacing: 0.2,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 3),
-                                      Icon(
-                                        isExpanded
-                                            ? Icons.keyboard_arrow_up_rounded
-                                            : Icons.keyboard_arrow_down_rounded,
-                                        size: 14,
-                                        color: isExpanded
-                                            ? const Color(
-                                                0xFFEF4444,
-                                              ).withOpacity(0.7)
-                                            : const Color(0xFFF59E0B),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        trailing: IconButton(
-                          icon: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEF4444).withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.delete_outline_rounded,
-                              color: Color(0xFFEF4444),
-                              size: 20,
-                            ),
-                          ),
-                          onPressed: () async {
-                            try {
-                              final reminderData = box.getAt(index);
-                              final alarmId = reminderData["alarmId"];
-
-                              await Alarm.stop(alarmId);
-                              await NotificationService.notifications.cancel(
-                                alarmId,
-                              );
-                              await box.deleteAt(index);
-                            } catch (e) {
-                              print("Delete Error: $e");
-                            }
+                            );
                           },
-                        ),
-                        children: [
-                          if (tableData != null && tableData.isNotEmpty) ...[
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20.0),
-                              child: Divider(
-                                color: Color(0xFFF1F5F9),
-                                height: 1,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF8FAFC),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: const Color(0xFFE2E8F0),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    physics: const BouncingScrollPhysics(),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Table(
-                                        defaultColumnWidth:
-                                            const FixedColumnWidth(130.0),
-                                        children: List.generate(tableData.length, (
-                                          rowIndex,
-                                        ) {
-                                          final row =
-                                              tableData[rowIndex] as List;
-                                          final bool isHeader = rowIndex == 0;
-
-                                          return TableRow(
-                                            children: List.generate(row.length, (
-                                              colIndex,
-                                            ) {
-                                              return Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10,
-                                                    ),
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 3,
-                                                      vertical: 3,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: isHeader
-                                                      ? const Color(
-                                                          0xFF2563EB,
-                                                        ).withOpacity(0.08)
-                                                      : Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  border: Border.all(
-                                                    color: isHeader
-                                                        ? const Color(
-                                                            0xFF2563EB,
-                                                          ).withOpacity(0.15)
-                                                        : const Color(
-                                                            0xFFE2E8F0,
-                                                          ),
-                                                    width: 1,
-                                                  ),
-                                                ),
-                                                child: Text(
-                                                  row[colIndex].toString(),
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: isHeader
-                                                        ? FontWeight.w800
-                                                        : FontWeight.w500,
-                                                    color: isHeader
-                                                        ? const Color(
-                                                            0xFF1D4ED8,
-                                                          )
-                                                        : const Color(
-                                                            0xFF1E3A8A,
-                                                          ),
-                                                  ),
-                                                ),
-                                              );
-                                            }),
-                                          );
-                                        }),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                );
-              },
-            );
-          },
+            ),
+          ],
         );
       },
     );
   }
+}
+
+class CornerCurvePainter extends CustomPainter {
+  final Color color;
+  CornerCurvePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap
+          .round // Smooth outer edge terminators matching original image design asset layer
+      ..strokeWidth =
+          3.5; // Thicker weight footprint matches card outer border line perfectly
+
+    final path = Path()
+      ..moveTo(0, size.height - 24) // Sweep start matches corner radius arcs
+      ..quadraticBezierTo(0, size.height, 24, size.height);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class TopCornerCurvePainter extends CustomPainter {
+  final Color color;
+
+  TopCornerCurvePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    final path = Path()
+      ..moveTo(size.width - 24, 0)
+      ..quadraticBezierTo(size.width, 0, size.width, 24);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

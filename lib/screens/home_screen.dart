@@ -33,10 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _pageController.dispose();
     titleController.dispose();
-    // for (var field in customFields) {
-    //   field['key']?.dispose();
-    //   field['value']?.dispose();
-    // }
     super.dispose();
   }
 
@@ -61,18 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
       for (var controller in tableData[index]) {
         controller.dispose();
       }
-
       tableData.removeAt(index);
     });
   }
-
-  // void _removeCustomField(int index) {
-  //   setState(() {
-  //     customFields[index]['key']?.dispose();
-  //     customFields[index]['value']?.dispose();
-  //     customFields.removeAt(index);
-  //   });
-  // }
 
   Future<void> _pickDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -83,9 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
-            primary: Color(0xFF1D4ED8),
+            primary: Color(0xFF8C4A32),
             onPrimary: Colors.white,
-            onSurface: Color(0xFF1E3A8A),
+            onSurface: Color(0xFF2D3142),
           ),
         ),
         child: child!,
@@ -101,9 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
           colorScheme: const ColorScheme.light(
-            primary: Color(0xFF1D4ED8),
+            primary: Color(0xFF8C4A32),
             onPrimary: Colors.white,
-            onSurface: Color(0xFF1E3A8A),
+            onSurface: Color(0xFF2D3142),
           ),
         ),
         child: child!,
@@ -137,14 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // for (var field in customFields) {
-    //   final key = field['key']!.text.trim();
-    //   final value = field['value']!.text.trim();
-    //   if (key.isNotEmpty && value.isNotEmpty) fields[key] = value;
-    // }
-
     final int uniqueAlarmId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    print(table);
     box.add({
       "alarmId": uniqueAlarmId,
       "title": titleController.text.trim(),
@@ -182,16 +162,16 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.4)),
+            border: Border.all(color: const Color(0xFF8C4A32).withOpacity(0.2)),
           ),
           child: const Row(
             children: [
-              Icon(Icons.offline_pin_rounded, color: Color(0xFFD97706)),
+              Icon(Icons.offline_pin_rounded, color: Color(0xFF8C4A32)),
               SizedBox(width: 12),
               Text(
                 "Saved to timeline!",
                 style: TextStyle(
-                  color: Color(0xFF1E3A8A),
+                  color: Color(0xFF2D3142),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -205,7 +185,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       selectedDate = null;
       selectedTime = null;
-      // customFields.clear();
       tableData = [
         [TextEditingController(), TextEditingController()],
       ];
@@ -215,24 +194,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF6F4F0),
       appBar: AppBar(
-        backgroundColor: Colors.white.withOpacity(0.45),
+        backgroundColor: const Color(0xFFF6F4F0).withOpacity(0.6),
         elevation: 0,
         scrolledUnderElevation: 0,
         toolbarHeight: 70.0,
-        flexibleSpace: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          color: const Color(0xFF1E3A8A),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
+          color: const Color(0xFF8C4A32),
           onPressed: () {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const NameScreen()),
@@ -243,68 +214,18 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(
           _currentTab == 0 ? "Create Reminder" : "My Reminders",
           style: const TextStyle(
-            fontSize: 21,
+            fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF1E3A8A),
+            color: Color(0xFF8C4A32),
             letterSpacing: -0.4,
           ),
         ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            color: const Color(0xFF1E3A8A).withOpacity(0.12),
-            height: 1.0,
-          ),
-        ),
       ),
-      extendBodyBehindAppBar: false,
+      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // Background Vector Auras
-          Positioned(
-            top: -100,
-            right: -100,
-            child: Container(
-              width: screenSize.width * 0.9,
-              height: screenSize.width * 0.9,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF2563EB).withOpacity(0.18),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: screenSize.height * 0.3,
-            left: -screenSize.width * 0.4,
-            child: Container(
-              width: screenSize.width * 1.1,
-              height: screenSize.width * 1.1,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFFF59E0B).withOpacity(0.15),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(color: Colors.transparent),
-            ),
-          ),
-
-          // Navigation Flow PageView
+          // Navigation PageView content screen workspace area
           SafeArea(
-            top: false,
             child: Column(
               children: [
                 Expanded(
@@ -334,21 +255,157 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Floating Navigation Buttons
+          // Glassmorphic Floating Pill Navigation Bar
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildCircularNavButton(index: 0, icon: Icons.create_rounded),
-                  const SizedBox(width: 28),
-                  _buildCircularNavButton(
-                    index: 1,
-                    icon: Icons.folder_special_rounded,
+              padding: const EdgeInsets.only(
+                bottom: 34.0,
+                left: 24.0,
+                right: 24.0,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(40),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                  child: Container(
+                    height: 70,
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.65),
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final double totalWidth = constraints.maxWidth;
+                        final double tabWidth = totalWidth / 2;
+
+                        return Stack(
+                          children: [
+                            // Sliding highlighted active capsule background slider
+                            AnimatedPositioned(
+                              duration: const Duration(milliseconds: 350),
+                              curve: Curves.easeOutQuint,
+                              left: _currentTab == 0 ? 0 : tabWidth,
+                              width: tabWidth,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF8C4A32),
+                                  borderRadius: BorderRadius.circular(32),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFF8C4A32,
+                                      ).withOpacity(0.25),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // Interactive text and icon buttons row layer
+                            Row(
+                              children: [
+                                // Tab 1: Create Trigger Block
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => _navigateToPage(0),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.add_task_rounded,
+                                            color: _currentTab == 0
+                                                ? Colors.white
+                                                : const Color(
+                                                    0xFF2D3142,
+                                                  ).withOpacity(0.5),
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Create",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: _currentTab == 0
+                                                  ? Colors.white
+                                                  : const Color(
+                                                      0xFF2D3142,
+                                                    ).withOpacity(0.5),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Tab 2: Reminders Trigger Block
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => _navigateToPage(1),
+                                    behavior: HitTestBehavior.opaque,
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.folder_open_rounded,
+                                            color: _currentTab == 1
+                                                ? Colors.white
+                                                : const Color(
+                                                    0xFF2D3142,
+                                                  ).withOpacity(0.5),
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            "Reminders",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: _currentTab == 1
+                                                  ? Colors.white
+                                                  : const Color(
+                                                      0xFF2D3142,
+                                                    ).withOpacity(0.5),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -357,47 +414,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCircularNavButton({required int index, required IconData icon}) {
-    final bool isSelected = _currentTab == index;
-    return GestureDetector(
-      onTap: () => _pageController.animateToPage(
-        index,
-        duration: const Duration(milliseconds: 450),
-        curve: Curves.easeOutQuint,
-      ),
-      child: Container(
-        height: 54,
-        width: 54,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          // 1. Swapped unselected background from glassy white opacity to sharp solid white
-          color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
-          border: Border.all(
-            // 2. Swapped unselected white border for a subtle themed blue border outline tint
-            color: isSelected
-                ? const Color(0xFFF59E0B)
-                : const Color(0xFF2563EB).withOpacity(0.12),
-            width: isSelected ? 2.5 : 1.5,
-          ),
-          // 3. Added premium drop shadows to make buttons float clearly above background vectors
-          boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? const Color(0xFF1E3A8A).withOpacity(0.25)
-                  : const Color(0xFF1E3A8A).withOpacity(0.08),
-              blurRadius: isSelected ? 16 : 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: isSelected
-              ? const Color(0xFFF59E0B)
-              : const Color(0xFF1E3A8A).withOpacity(0.6),
-          size: 22,
-        ),
-      ),
+  void _navigateToPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutQuint,
     );
   }
 }
