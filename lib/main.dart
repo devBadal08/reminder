@@ -56,6 +56,7 @@ class _ReminderAppState extends State<ReminderApp> {
             alarmId: alarmSettings.id,
             title: reminderData?["title"] ?? "Reminder",
             tableData: reminderData?["tableData"],
+            attachmentPaths: reminderData?["attachmentPaths"],
           ),
         ),
       );

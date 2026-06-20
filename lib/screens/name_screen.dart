@@ -13,12 +13,12 @@ class NameScreen extends StatefulWidget {
 class _NameScreenState extends State<NameScreen> {
   final TextEditingController nameController = TextEditingController();
 
-  // Updated Reference Design Color Palette (Royal Sapphire Blue Theme)
+  // Premium Custom Theme Palette Matching Global Core Colors
   final Color primaryThemeBlue = const Color(0xFF8C4A32);
   final Color backgroundCream = const Color(0xFFF6F4F0);
   final Color textMutedColor = const Color(0xFF6B6A66);
 
-  // Gold Gradient Colors for the Button
+  // Gold Gradient Colors for the Action Button
   final List<Color> goldGradient = const [Color(0xFFE5CBB2), Color(0xFFD3B69A)];
 
   @override
@@ -49,7 +49,7 @@ class _NameScreenState extends State<NameScreen> {
             ),
           ),
 
-          // Upper Content Layer
+          // Upper Structural Content Presentation Layer
           SafeArea(
             bottom: false,
             child: SingleChildScrollView(
@@ -64,7 +64,7 @@ class _NameScreenState extends State<NameScreen> {
                       width: 76,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: primaryThemeBlue, // Replaced
+                        color: primaryThemeBlue,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.12),
@@ -80,22 +80,53 @@ class _NameScreenState extends State<NameScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
 
-                  // Header Typography
+                  // Header Typography Title
                   Text(
                     "Reminder",
                     style: TextStyle(
                       fontFamily: 'Serif',
                       fontSize: 46,
                       fontWeight: FontWeight.w500,
-                      color: primaryThemeBlue, // Replaced
+                      color: primaryThemeBlue,
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
 
-                  // Elegant Small Diamond Divider
+                  // Integrated Brand Signature Row Label
+                  Column(
+                    children: [
+                      Text(
+                        "Powered by",
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: textMutedColor.withOpacity(0.7),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Image.asset(
+                        'assets/logo.png',
+                        height: 38, // adjust logo size
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Text(
+                            "TechStrota",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: primaryThemeBlue,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+
+                  // Elegant Small Diamond Divider Line
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -119,11 +150,11 @@ class _NameScreenState extends State<NameScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
 
-                  // Description Text
+                  // Subtitle App Description Text
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 48.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Text(
                       "Stay organized and never\nmiss an important task.",
                       textAlign: TextAlign.center,
@@ -136,26 +167,24 @@ class _NameScreenState extends State<NameScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
-
-                  // Explicit Sized Layout Box for Illustration Asset
+                  // Reduced Compact Scale Box for the Center Illustration Artwork
                   SizedBox(
-                    height: screenHeight * 0.28,
+                    height:
+                        screenHeight *
+                        0.24, // Reduced from 0.28 to give layout whitespace breathing room
                     width: double.infinity,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Image.asset(
                         'assets/calendar_illustration.png',
                         fit: BoxFit.contain,
-                        alignment: Alignment.bottomCenter,
+                        alignment: Alignment.center,
                         errorBuilder: (context, error, stackTrace) {
                           return Center(
                             child: Icon(
                               Icons.calendar_month_rounded,
-                              size: 70,
-                              color: primaryThemeBlue.withOpacity(
-                                0.1,
-                              ), // Replaced
+                              size: 64,
+                              color: primaryThemeBlue.withOpacity(0.1),
                             ),
                           );
                         },
@@ -167,14 +196,14 @@ class _NameScreenState extends State<NameScreen> {
             ),
           ),
 
-          // Bottom Curved Dashboard Control Panel
+          // Bottom Curved Dashboard Registration Input Control Panel
           Align(
             alignment: Alignment.bottomCenter,
             child: ClipPath(
               clipper: ConcaveCurveClipper(),
               child: Container(
                 width: double.infinity,
-                color: primaryThemeBlue, // Replaced
+                color: primaryThemeBlue,
                 padding: const EdgeInsets.only(
                   left: 28.0,
                   right: 28.0,
@@ -196,7 +225,7 @@ class _NameScreenState extends State<NameScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // Input Name Textfield Layout
+                    // Input Name Textfield Layer Layout
                     TextField(
                       controller: nameController,
                       style: const TextStyle(color: Colors.white, fontSize: 16),
@@ -233,9 +262,9 @@ class _NameScreenState extends State<NameScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 22),
 
-                    // Premium Gold Gradient Interaction Button
+                    // Premium Gold Variant Interactive Submission Trigger Button
                     GestureDetector(
                       onTap: () => _verifyAndNavigate(context),
                       child: Container(
@@ -291,8 +320,9 @@ class _NameScreenState extends State<NameScreen> {
     }
 
     final prefs = await SharedPreferences.getInstance();
-
     await prefs.setString('user_name', nameController.text.trim());
+
+    if (!context.mounted) return;
 
     Navigator.pushReplacement(
       context,

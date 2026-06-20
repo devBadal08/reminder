@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:reminder/screens/name_screen.dart';
 import 'package:reminder/services/alarm_service.dart';
+import 'package:reminder/services/attachment_service.dart';
 import 'package:reminder/services/notification_service.dart';
 import 'package:reminder/widgets/create_reminder_tab.dart';
 import 'package:reminder/widgets/reminders_tab.dart';
@@ -28,6 +29,17 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   String selectedRingtone = 'assets/audio/alarm1.mp3';
+  List<String> attachmentPaths = [];
+
+  Future<void> pickMultipleAttachments() async {
+    final paths = await AttachmentService.pickAndSaveFiles(allowMultiple: true);
+
+    if (paths.isNotEmpty) {
+      setState(() {
+        attachmentPaths.addAll(paths);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -111,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _saveReminderToHive() async {
+    FocusScope.of(context).unfocus();
     final box = Hive.box('reminders');
     final List<List<String>> table = tableData
         .map((row) => row.map((controller) => controller.text.trim()).toList())
@@ -132,6 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
       "time": selectedTime?.format(context),
       "tableData": table,
       "ringtone": selectedRingtone,
+      "attachmentPaths": attachmentPaths,
     });
 
     final reminderDateTime = getReminderDateTime();
@@ -185,6 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       selectedDate = null;
       selectedTime = null;
+      attachmentPaths = [];
       tableData = [
         [TextEditingController(), TextEditingController()],
       ];
@@ -246,6 +261,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         onAddColumn: addColumn,
                         onAddRow: addRow,
                         onRemoveRow: removeRow,
+                        attachmentPaths: attachmentPaths,
+                        onPickMultipleAttachments: pickMultipleAttachments,
                       ),
                       const RemindersTab(),
                     ],

@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:reminder/screens/full_screen_image_page.dart';
 import 'package:reminder/services/notification_service.dart';
 
 class RemindersTab extends StatelessWidget {
@@ -178,7 +182,10 @@ class RemindersTab extends StatelessWidget {
                       itemCount: box.length,
                       itemBuilder: (context, index) {
                         final reminder = box.getAt(index);
+                        print(reminder);
                         final List<dynamic>? tableData = reminder["tableData"];
+                        final List<dynamic>? attachmentPaths =
+                            reminder["attachmentPaths"] as List?;
 
                         return StatefulBuilder(
                           builder: (context, setTileState) {
@@ -316,6 +323,7 @@ class RemindersTab extends StatelessWidget {
                                                   ),
                                                 ],
                                               ),
+
                                               if (tableData != null &&
                                                   tableData.isNotEmpty)
                                                 Padding(
@@ -520,6 +528,184 @@ class RemindersTab extends StatelessWidget {
                                                       ),
                                                     ),
                                                   ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+
+                                          if (attachmentPaths != null &&
+                                              attachmentPaths.isNotEmpty) ...[
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                    16,
+                                                    12,
+                                                    16,
+                                                    8,
+                                                  ),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  12,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(
+                                                    0xFFFBFBFB,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  border: Border.all(
+                                                    color: const Color(
+                                                      0xFFE5E5E5,
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      "Attachments",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Color(
+                                                          0xFF8C4A32,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 12),
+
+                                                    ...attachmentPaths.map((
+                                                      path,
+                                                    ) {
+                                                      final String filePath =
+                                                          path.toString();
+                                                      final bool isPdf =
+                                                          filePath
+                                                              .toLowerCase()
+                                                              .endsWith(".pdf");
+
+                                                      return Padding(
+                                                        padding:
+                                                            const EdgeInsets.only(
+                                                              bottom: 12,
+                                                            ),
+                                                        child: isPdf
+                                                            ? InkWell(
+                                                                onTap: () {
+                                                                  OpenFilex.open(
+                                                                    filePath,
+                                                                  );
+                                                                },
+                                                                child: Row(
+                                                                  children: [
+                                                                    const Icon(
+                                                                      Icons
+                                                                          .picture_as_pdf_rounded,
+                                                                      color: Colors
+                                                                          .red,
+                                                                      size: 34,
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 12,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child: Text(
+                                                                        filePath
+                                                                            .split(
+                                                                              '/',
+                                                                            )
+                                                                            .last,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      ),
+                                                                    ),
+                                                                    const Icon(
+                                                                      Icons
+                                                                          .open_in_new,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              )
+                                                            : InkWell(
+                                                                onTap: () {
+                                                                  Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder: (_) => FullScreenImagePage(
+                                                                        imagePath:
+                                                                            filePath,
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                },
+                                                                child: Container(
+                                                                  padding:
+                                                                      const EdgeInsets.all(
+                                                                        12,
+                                                                      ),
+                                                                  decoration: BoxDecoration(
+                                                                    color: const Color(
+                                                                      0xFFF7F7F7,
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          12,
+                                                                        ),
+                                                                    border: Border.all(
+                                                                      color: const Color(
+                                                                        0xFFE5E5E5,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  child: Row(
+                                                                    children: [
+                                                                      const Icon(
+                                                                        Icons
+                                                                            .image_rounded,
+                                                                        color: Colors
+                                                                            .blue,
+                                                                        size:
+                                                                            30,
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            12,
+                                                                      ),
+                                                                      Expanded(
+                                                                        child: Text(
+                                                                          filePath
+                                                                              .split(
+                                                                                '/',
+                                                                              )
+                                                                              .last,
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                          style: const TextStyle(
+                                                                            fontWeight:
+                                                                                FontWeight.w500,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            8,
+                                                                      ),
+                                                                      const Icon(
+                                                                        Icons
+                                                                            .open_in_full,
+                                                                        size:
+                                                                            18,
+                                                                        color: Colors
+                                                                            .grey,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                      );
+                                                    }),
+                                                  ],
                                                 ),
                                               ),
                                             ),

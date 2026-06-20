@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:reminder/services/attachment_service.dart';
 
-class CreateReminderTab extends StatelessWidget {
+class CreateReminderTab extends StatefulWidget {
   final String name;
   final TextEditingController titleController;
   final DateTime? selectedDate;
@@ -9,6 +10,8 @@ class CreateReminderTab extends StatelessWidget {
   final VoidCallback onPickTime;
   final VoidCallback onCommit;
   final List<List<TextEditingController>> tableData;
+  final List<String> attachmentPaths;
+  final VoidCallback onPickMultipleAttachments;
 
   final VoidCallback onAddColumn;
   final VoidCallback onAddRow;
@@ -27,8 +30,15 @@ class CreateReminderTab extends StatelessWidget {
     required this.onAddColumn,
     required this.onAddRow,
     required this.onRemoveRow,
+    required this.attachmentPaths,
+    required this.onPickMultipleAttachments,
   });
 
+  @override
+  State<CreateReminderTab> createState() => _CreateReminderTabState();
+}
+
+class _CreateReminderTabState extends State<CreateReminderTab> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,23 +47,24 @@ class CreateReminderTab extends StatelessWidget {
         children: [
           // Replaced geometric sharp orange lines with a soft ambient theme-color radial glow
           Positioned(
-            top: -60,
-            right: -60,
-            child: Container(
-              width: 270,
-              height: 270,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(
-                      0xFF8C4A32,
-                    ).withOpacity(0.15), // Theme-colored ambient soft core glow
-                    const Color(
-                      0xFFF6F4F0,
-                    ), // Dissolves seamlessly into the canvas background color
-                  ],
-                  stops: const [0.2, 1.0],
+            top: -140,
+            left: -80,
+            right: -80,
+            child: ClipPath(
+              clipper: TopGlowClipper(),
+              child: Container(
+                height: 290,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.topCenter,
+                    radius: 1.25,
+                    colors: [
+                      const Color(0xFF8C4A32).withOpacity(0.20),
+                      const Color(0xFF8C4A32).withOpacity(0.08),
+                      const Color(0xFFF6F4F0),
+                    ],
+                    stops: const [0.0, 0.45, 1.0],
+                  ),
                 ),
               ),
             ),
@@ -88,7 +99,7 @@ class CreateReminderTab extends StatelessWidget {
                                       ),
                                     ),
                                     TextSpan(
-                                      text: name,
+                                      text: widget.name,
                                       style: const TextStyle(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
@@ -200,7 +211,7 @@ class CreateReminderTab extends StatelessWidget {
                             ),
                             const SizedBox(height: 14),
                             TextField(
-                              controller: titleController,
+                              controller: widget.titleController,
                               style: const TextStyle(
                                 color: Color(0xFF2D3142),
                                 fontWeight: FontWeight.w500,
@@ -247,7 +258,7 @@ class CreateReminderTab extends StatelessWidget {
                     Expanded(
                       child: _bentoBox(
                         child: InkWell(
-                          onTap: onPickDate,
+                          onTap: widget.onPickDate,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -258,9 +269,9 @@ class CreateReminderTab extends StatelessWidget {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    selectedDate == null
+                                    widget.selectedDate == null
                                         ? "Select Date"
-                                        : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                                        : "${widget.selectedDate!.day}/${widget.selectedDate!.month}/${widget.selectedDate!.year}",
                                     style: const TextStyle(
                                       color: Color(0xFF2D3142),
                                       fontWeight: FontWeight.w600,
@@ -282,7 +293,7 @@ class CreateReminderTab extends StatelessWidget {
                     Expanded(
                       child: _bentoBox(
                         child: InkWell(
-                          onTap: onPickTime,
+                          onTap: widget.onPickTime,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -293,9 +304,9 @@ class CreateReminderTab extends StatelessWidget {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    selectedTime == null
+                                    widget.selectedTime == null
                                         ? "Select Time"
-                                        : selectedTime!.format(context),
+                                        : widget.selectedTime!.format(context),
                                     style: const TextStyle(
                                       color: Color(0xFF2D3142),
                                       fontWeight: FontWeight.w600,
@@ -330,7 +341,7 @@ class CreateReminderTab extends StatelessWidget {
                             child: _matrixActionButton(
                               label: "Add Column",
                               icon: Icons.add,
-                              onTap: onAddColumn,
+                              onTap: widget.onAddColumn,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -338,79 +349,83 @@ class CreateReminderTab extends StatelessWidget {
                             child: _matrixActionButton(
                               label: "Add Row",
                               icon: Icons.add,
-                              onTap: onAddRow,
+                              onTap: widget.onAddRow,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
-                      ...List.generate(tableData.length, (rowIndex) {
+                      ...List.generate(widget.tableData.length, (rowIndex) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              ...List.generate(tableData[rowIndex].length, (
-                                colIndex,
-                              ) {
-                                return Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                    ),
-                                    child: TextField(
-                                      controller: tableData[rowIndex][colIndex],
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xFF2D3142),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                ...List.generate(
+                                  widget.tableData[rowIndex].length,
+                                  (colIndex) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
                                       ),
-                                      decoration: InputDecoration(
-                                        hintText: rowIndex == 0
-                                            ? "Header ${colIndex + 1}"
-                                            : "Value",
-                                        hintStyle: TextStyle(
-                                          color: const Color(
-                                            0xFF2D3142,
-                                          ).withOpacity(0.3),
-                                        ),
-                                        filled: true,
-                                        fillColor: const Color(0xFFFBFBFB),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                              vertical: 12,
+                                      child: SizedBox(
+                                        width: 110,
+                                        child: TextField(
+                                          controller: widget
+                                              .tableData[rowIndex][colIndex],
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xFF2D3142),
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: rowIndex == 0
+                                                ? "Header ${colIndex + 1}"
+                                                : "Value",
+                                            hintStyle: TextStyle(
+                                              color: const Color(
+                                                0xFF2D3142,
+                                              ).withOpacity(0.3),
                                             ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          borderSide: BorderSide(
-                                            color: Colors.grey.withOpacity(
-                                              0.15,
+                                            filled: true,
+                                            fillColor: const Color(0xFFFBFBFB),
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 14,
+                                                  vertical: 12,
+                                                ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide(
+                                                color: Colors.grey.withOpacity(
+                                                  0.15,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          borderSide: const BorderSide(
-                                            color: Color(0xFF8C4A32),
-                                            width: 1.2,
+                                            focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: const BorderSide(
+                                                color: Color(0xFF8C4A32),
+                                                width: 1.2,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              }),
-                              IconButton(
-                                onPressed: () => onRemoveRow(rowIndex),
-                                icon: const Icon(
-                                  Icons.delete_outline_rounded,
-                                  color: Color(0xFF8C4A32),
+                                    );
+                                  },
                                 ),
-                              ),
-                            ],
+                                IconButton(
+                                  onPressed: () => widget.onRemoveRow(rowIndex),
+                                  icon: const Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: Color(0xFF8C4A32),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       }),
@@ -433,9 +448,98 @@ class CreateReminderTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
+                _bentoBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _bentoLabel("Attachment", Icons.attach_file_rounded),
+                      const SizedBox(height: 16),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InkWell(
+                            onTap: widget.onPickMultipleAttachments,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFF8C4A32,
+                                ).withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFF8C4A32,
+                                  ).withOpacity(0.15),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.upload_file,
+                                    color: Color(0xFF8C4A32),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      widget.attachmentPaths.isEmpty
+                                          ? "Upload Images / PDF"
+                                          : "${widget.attachmentPaths.length} files selected",
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          if (widget.attachmentPaths.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: widget.attachmentPaths.map((path) {
+                                final fileName = path.split('/').last;
+
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    fileName,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton.icon(
+                                onPressed: widget.onPickMultipleAttachments,
+                                icon: const Icon(Icons.add),
+                                label: const Text("Add More"),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
                 // Main Action Confirmation Button
                 GestureDetector(
-                  onTap: onCommit,
+                  onTap: widget.onCommit,
                   child: Container(
                     width: double.infinity,
                     height: 60,
@@ -591,4 +695,28 @@ class CreateReminderTab extends StatelessWidget {
       ),
     );
   }
+}
+
+class TopGlowClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+
+    path.lineTo(0, size.height - 50);
+
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height + 40,
+      size.width,
+      size.height - 50,
+    );
+
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
