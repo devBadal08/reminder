@@ -19,6 +19,9 @@ class AlarmScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("TITLE: $title");
+    print("TABLE DATA: $tableData");
+    print("ATTACHMENTS: $attachmentPaths");
     return Scaffold(
       body: Container(
         // Smooth, modern dark gradient background

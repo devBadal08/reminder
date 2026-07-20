@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:reminder/screens/name_screen.dart';
 import 'package:reminder/services/alarm_service.dart';
 import 'package:reminder/services/attachment_service.dart';
 import 'package:reminder/services/notification_service.dart';
 import 'package:reminder/widgets/create_reminder_tab.dart';
 import 'package:reminder/widgets/reminders_tab.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   final String name;
@@ -122,89 +124,92 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _saveReminderToHive() async {
+  Future<void> _saveReminder() async {
     FocusScope.of(context).unfocus();
-    final box = Hive.box('reminders');
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    print("SAVE TOKEN: $token");
+
+    if (token == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please login again")));
+      return;
+    }
+
     final List<List<String>> table = tableData
-        .map((row) => row.map((controller) => controller.text.trim()).toList())
+        .map((row) => row.map((c) => c.text.trim()).toList())
         .toList();
 
     if (titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a reminder title")),
+        const SnackBar(content: Text("Please enter reminder title")),
       );
       return;
     }
 
-    final int uniqueAlarmId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    box.add({
-      "alarmId": uniqueAlarmId,
-      "title": titleController.text.trim(),
-      "date": selectedDate?.toString(),
-      "time": selectedTime?.format(context),
-      "tableData": table,
-      "ringtone": selectedRingtone,
-      "attachmentPaths": attachmentPaths,
-    });
-
     final reminderDateTime = getReminderDateTime();
 
-    if (reminderDateTime != null && reminderDateTime.isAfter(DateTime.now())) {
-      await NotificationService.scheduleNotification(
-        id: uniqueAlarmId,
-        title: titleController.text.trim(),
-        body: "Reminder Time",
-        scheduledDate: reminderDateTime,
-      );
+    print("Date: $selectedDate");
+    print("Time: $selectedTime");
+    print("DateTime: $reminderDateTime");
 
-      await AlarmService.scheduleAlarm(
-        id: uniqueAlarmId,
-        title: titleController.text.trim(),
-        dateTime: reminderDateTime,
-      );
-    }
+    final int uniqueAlarmId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        content: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF8C4A32).withOpacity(0.2)),
-          ),
-          child: const Row(
-            children: [
-              Icon(Icons.offline_pin_rounded, color: Color(0xFF8C4A32)),
-              SizedBox(width: 12),
-              Text(
-                "Saved to timeline!",
-                style: TextStyle(
-                  color: Color(0xFF2D3142),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    final response = await http.post(
+      Uri.parse('http://192.168.1.2:8000/api/reminders'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        "title": titleController.text.trim(),
+        "reminder_datetime": reminderDateTime?.toIso8601String(),
+        "table_data": table,
+        "attachment_paths": attachmentPaths,
+        "alarm_id": uniqueAlarmId,
+      }),
     );
 
-    titleController.clear();
-    setState(() {
-      selectedDate = null;
-      selectedTime = null;
-      attachmentPaths = [];
-      tableData = [
-        [TextEditingController(), TextEditingController()],
-      ];
-      selectedRingtone = 'assets/audio/alarm1.mp3';
-    });
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      if (reminderDateTime != null) {
+        await AlarmService.scheduleAlarm(
+          id: uniqueAlarmId,
+          title: titleController.text.trim(),
+          dateTime: reminderDateTime,
+        );
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Reminder saved")));
+
+      setState(() {
+        titleController.clear();
+        selectedDate = null;
+        selectedTime = null;
+        attachmentPaths.clear();
+
+        for (var row in tableData) {
+          for (var controller in row) {
+            controller.dispose();
+          }
+        }
+
+        tableData = [
+          [TextEditingController(), TextEditingController()],
+        ];
+      });
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(data['message'] ?? "Save failed")));
+    }
   }
 
   @override
@@ -256,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         selectedTime: selectedTime,
                         onPickDate: () => _pickDate(context),
                         onPickTime: () => _pickTime(context),
-                        onCommit: _saveReminderToHive,
+                        onCommit: _saveReminder,
                         tableData: tableData,
                         onAddColumn: addColumn,
                         onAddRow: addRow,

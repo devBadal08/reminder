@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'name_screen.dart';
@@ -20,11 +22,12 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkUser() async {
     final prefs = await SharedPreferences.getInstance();
 
+    final token = prefs.getString('token');
     final name = prefs.getString('user_name');
 
     if (!mounted) return;
 
-    if (name != null && name.isNotEmpty) {
+    if (token != null && name != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomeScreen(name: name)),

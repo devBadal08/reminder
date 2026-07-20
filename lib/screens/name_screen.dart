@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:reminder/screens/signup_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 
@@ -11,25 +14,29 @@ class NameScreen extends StatefulWidget {
 }
 
 class _NameScreenState extends State<NameScreen> {
-  final TextEditingController nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   // Premium Custom Theme Palette Matching Global Core Colors
   final Color primaryThemeBlue = const Color(0xFF8C4A32);
   final Color backgroundCream = const Color(0xFFF6F4F0);
   final Color textMutedColor = const Color(0xFF6B6A66);
+  bool _obscurePassword = true;
 
   // Gold Gradient Colors for the Action Button
   final List<Color> goldGradient = const [Color(0xFFE5CBB2), Color(0xFFD3B69A)];
 
   @override
   void dispose() {
-    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: backgroundCream,
@@ -150,45 +157,41 @@ class _NameScreenState extends State<NameScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
 
                   // Subtitle App Description Text
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                    child: Text(
-                      "Stay organized and never\nmiss an important task.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Serif',
-                        fontSize: 17,
-                        color: textMutedColor,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                  //   child: Text(
+                  //     "Stay organized and never\nmiss an important task.",
+                  //     textAlign: TextAlign.center,
+                  //     style: TextStyle(
+                  //       fontFamily: 'Serif',
+                  //       fontSize: 17,
+                  //       color: textMutedColor,
+                  //       height: 1.4,
+                  //     ),
+                  //   ),
+                  // ),
 
                   // Reduced Compact Scale Box for the Center Illustration Artwork
                   SizedBox(
                     height:
                         screenHeight *
-                        0.24, // Reduced from 0.28 to give layout whitespace breathing room
-                    width: double.infinity,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Image.asset(
-                        'assets/calendar_illustration.png',
-                        fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Center(
-                            child: Icon(
-                              Icons.calendar_month_rounded,
-                              size: 64,
-                              color: primaryThemeBlue.withOpacity(0.1),
-                            ),
-                          );
-                        },
-                      ),
+                        0.15, // Reduced from 0.28 to give layout whitespace breathing room
+                    width: screenWidth * 0.60,
+                    child: Image.asset(
+                      'assets/calendar_illustration.png',
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Center(
+                          child: Icon(
+                            Icons.calendar_month_rounded,
+                            size: 64,
+                            color: primaryThemeBlue.withOpacity(0.1),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -205,17 +208,17 @@ class _NameScreenState extends State<NameScreen> {
                 width: double.infinity,
                 color: primaryThemeBlue,
                 padding: const EdgeInsets.only(
-                  left: 28.0,
-                  right: 28.0,
-                  top: 56.0,
-                  bottom: 40.0,
+                  left: 20.0,
+                  right: 20.0,
+                  top: 40.0,
+                  bottom: 20.0,
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "GET STARTED",
+                      "WELCOME BACK",
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -223,22 +226,20 @@ class _NameScreenState extends State<NameScreen> {
                         letterSpacing: 2.0,
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // Input Name Textfield Layer Layout
                     TextField(
-                      controller: nameController,
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      cursorColor: const Color(0xFFE5CBB2),
+                      controller: emailController,
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: "Enter your name...",
+                        hintText: "Enter email",
                         hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
-                          fontWeight: FontWeight.w300,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.person_outline_rounded,
                           color: Colors.white.withOpacity(0.5),
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.email,
+                          color: Colors.white,
                         ),
                         filled: true,
                         fillColor: Colors.transparent,
@@ -262,11 +263,71 @@ class _NameScreenState extends State<NameScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 22),
+
+                    SizedBox(height: 10),
+
+                    TextField(
+                      controller: passwordController,
+                      obscureText: _obscurePassword,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Enter your password",
+                        hintStyle: TextStyle(
+                          color: Colors.white.withOpacity(0.5),
+                        ),
+                        prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        filled: true,
+                        fillColor: Colors.transparent,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 18,
+                          horizontal: 16,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Colors.white.withOpacity(0.25),
+                            width: 1.2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE5CBB2),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "Forgot Password?",
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                        ),
+                      ),
+                    ),
 
                     // Premium Gold Variant Interactive Submission Trigger Button
                     GestureDetector(
-                      onTap: () => _verifyAndNavigate(context),
+                      onTap: () async {
+                        await login();
+                      },
                       child: Container(
                         width: double.infinity,
                         height: 56,
@@ -282,7 +343,7 @@ class _NameScreenState extends State<NameScreen> {
                           alignment: Alignment.center,
                           children: [
                             Text(
-                              "Continue",
+                              "Login",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
@@ -301,6 +362,41 @@ class _NameScreenState extends State<NameScreen> {
                         ),
                       ),
                     ),
+
+                    const SizedBox(height: 10),
+
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Don't have an account? ",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const SignupScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -311,25 +407,76 @@ class _NameScreenState extends State<NameScreen> {
     );
   }
 
-  Future<void> _verifyAndNavigate(BuildContext context) async {
-    if (nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter your name to continue.")),
-      );
+  Future<void> login() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    // Empty validation
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter email")));
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_name', nameController.text.trim());
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter password")));
+      return;
+    }
 
-    if (!context.mounted) return;
+    // Email format validation
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HomeScreen(name: nameController.text.trim()),
-      ),
-    );
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please enter valid email")));
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.1.2:8000/api/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"email": email, "password": password}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      // Login success
+      if (response.statusCode == 200 && data['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+
+        await prefs.setString('token', data['token']);
+        await prefs.setString('user_name', data['user']['name']);
+
+        if (!mounted) return;
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HomeScreen(name: data['user']['name']),
+          ),
+        );
+      } else {
+        // Wrong email/password
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? "Invalid email or password"),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
   }
 }
 
